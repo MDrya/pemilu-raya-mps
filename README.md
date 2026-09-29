@@ -159,6 +159,17 @@ npm run seed:generate
 In development, `http://localhost:5173/?mock` shows the public page with local mock data and a panel to switch
 states (including results and a tie) without touching the database.
 
+### Verify against your Supabase project
+
+```bash
+npm run verify
+```
+
+Signs in as anon, panitia, and bilik (asks for the two staff passwords) and runs a full election against the
+real database: access rules, locked-booth and double-assignment rejections, a simultaneous double tap, three
+booths voting at once, cancel, `demo_simulate`, closing, Realtime payloads (no per-candidate data before close),
+and `demo_reset`. It resets the election at the start and the end.
+
 ### Deploy (Vercel)
 
 1. Push this repository to GitHub.

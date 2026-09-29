@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import CandidatePanels from '../components/public/CandidatePanels'
 import Hero from '../components/public/Hero'
@@ -13,6 +13,9 @@ import type { PublicData } from '../lib/types'
 import MockControls from '../mocks/MockControls'
 import { useMockPublicData } from '../mocks/useMockPublicData'
 
+const scrollToResults = () =>
+  document.getElementById('hasil')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
 function PublicView({ data, extra }: { data: PublicData; extra?: ReactNode }) {
   const { candidates, turnout, results, error, live, refresh } = data
   const status = turnout?.status ?? null
@@ -22,12 +25,23 @@ function PublicView({ data, extra }: { data: PublicData; extra?: ReactNode }) {
     document.title = ELECTION.name
   }, [])
 
-  // When voting closes while the page is open, bring the results into view.
+  // Voting closing while the page is open gets the full build-up; visitors who
+  // arrive later get a quick count (and can replay the full one).
+  const [reveal, setReveal] = useState({ key: 0, dramatic: false })
+  const [lastStatus, setLastStatus] = useState(status)
+  if (status !== lastStatus) {
+    setLastStatus(status)
+    if (lastStatus === 'dibuka' && status === 'ditutup') setReveal((r) => ({ key: r.key + 1, dramatic: true }))
+  }
+  const replay = () => {
+    setReveal((r) => ({ key: r.key + 1, dramatic: true }))
+    scrollToResults()
+  }
+
+  // ...and bring the results into view when that happens.
   const previousStatus = useRef(status)
   useEffect(() => {
-    if (previousStatus.current === 'dibuka' && status === 'ditutup') {
-      document.getElementById('hasil')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    if (previousStatus.current === 'dibuka' && status === 'ditutup') scrollToResults()
     previousStatus.current = status
   }, [status])
 
@@ -68,7 +82,14 @@ function PublicView({ data, extra }: { data: PublicData; extra?: ReactNode }) {
           <>
             <Timeline status={turnout.status} />
             {showResults ? (
-              <ResultsSection candidates={candidates} results={results} turnout={turnout} />
+              <ResultsSection
+                key={reveal.key}
+                candidates={candidates}
+                results={results}
+                turnout={turnout}
+                dramatic={reveal.dramatic}
+                onReplay={replay}
+              />
             ) : (
               <TurnoutSection turnout={turnout} live={live} />
             )}
