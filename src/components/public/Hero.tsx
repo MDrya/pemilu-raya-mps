@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
 import { ELECTION } from '../../config/election'
+import { hasKotakKosong, isKotakKosong } from '../../lib/candidates'
 import { formatInt } from '../../lib/format'
 import type { Candidate, ElectionStatus } from '../../lib/types'
 import StatusBadge from '../StatusBadge'
@@ -15,7 +16,9 @@ export default function Hero({
   totalDpt: number | null
 }) {
   const facts = [
-    { value: candidates.length, label: 'Pasangan Calon' },
+    hasKotakKosong(candidates)
+      ? { value: candidates.filter((c) => !isKotakKosong(c)).length, label: 'Calon Tunggal' }
+      : { value: candidates.length, label: candidates.some((c) => c.wakil_nama) ? 'Pasangan Calon' : 'Calon' },
     { value: totalDpt, label: 'Pemilih Terdaftar' },
     { value: ELECTION.boothCount, label: 'Bilik Suara' },
   ]
@@ -57,7 +60,7 @@ export default function Hero({
         ))}
       </dl>
 
-      {/* The three paslon accent colors as a quiet signature line. */}
+      {/* The candidates' accent colors as a quiet signature line. */}
       <div aria-hidden className="mt-6 flex h-1.5 overflow-hidden rounded-full">
         {candidates.map((c) => (
           <span key={c.id} className="flex-1" style={{ backgroundColor: c.accent_color }} />

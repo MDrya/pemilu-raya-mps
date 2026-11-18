@@ -4,15 +4,15 @@ import type { ElectionStatus, PublicData, PublicResult } from '../lib/types'
 
 const TOTAL_DPT = 400
 
+// Splits the votes across however many options the config has. "Seri" gives the
+// first two options the same count (with kotak kosong, a tie means it wins).
 function mockResults(voted: number, tie: boolean): PublicResult[] {
-  const [a, b, c] = CANDIDATES
-  const first = Math.floor(voted * 0.41)
-  const second = tie ? first : Math.floor(voted * 0.35)
-  return [
-    { candidate_id: a.id, vote_count: tie ? first : second },
-    { candidate_id: b.id, vote_count: first },
-    { candidate_id: c.id, vote_count: voted - first - second },
-  ]
+  const weights = CANDIDATES.map((_, i) => (tie ? (i < 2 ? 1 : 0) : 1 / (i + 1.4)))
+  const sum = weights.reduce((s, w) => s + w, 0)
+  const counts = weights.map((w) => Math.floor((voted * w) / sum))
+  const remainder = voted - counts.reduce((s, c) => s + c, 0)
+  counts[tie && counts.length > 2 ? counts.length - 1 : 0] += remainder
+  return CANDIDATES.map((c, i) => ({ candidate_id: c.id, vote_count: counts[i] }))
 }
 
 // Local stand-in for the public Supabase data (dev: add ?mock to the URL).

@@ -56,7 +56,11 @@ function voterName() {
   return `${first} ${last}`
 }
 
-const sql = (value: string) => `'${value.replaceAll("'", "''")}'`
+const sql = (value: string | null) => (value === null ? 'null' : `'${value.replaceAll("'", "''")}'`)
+
+// Postgres can't type an empty array[] literal, so an empty misi list becomes '{}'.
+const textArray = (items: string[]) =>
+  items.length === 0 ? "'{}'::text[]" : `array[\n${items.map((m) => `     ${sql(m)}`).join(',\n')}\n   ]`
 
 const voters: { nis: string; nama: string }[] = []
 for (let i = 0; i < VOTER_COUNT; i++) {
@@ -68,9 +72,9 @@ voters.sort((a, b) => a.nis.localeCompare(b.nis))
 
 const candidateRows = CANDIDATES.map(
   (c) =>
-    `  (${c.nomor_urut}, ${sql(c.ketua_nama)}, ${sql(c.wakil_nama)},\n` +
+    `  (${sql(c.kind)}, ${c.nomor_urut}, ${sql(c.ketua_nama)}, ${sql(c.wakil_nama)},\n` +
     `   ${sql(c.visi)},\n` +
-    `   array[\n${c.misi.map((m) => `     ${sql(m)}`).join(',\n')}\n   ],\n` +
+    `   ${textArray(c.misi)},\n` +
     `   ${sql(c.accent_color)})`,
 )
 
@@ -104,7 +108,7 @@ delete from public.public_turnout;
 insert into public.election (id, name, status)
 values (1, ${sql(ELECTION.name)}, 'belum_dibuka');
 
-insert into public.candidates (nomor_urut, ketua_nama, wakil_nama, visi, misi, accent_color)
+insert into public.candidates (kind, nomor_urut, ketua_nama, wakil_nama, visi, misi, accent_color)
 values
 ${candidateRows.join(',\n')};
 

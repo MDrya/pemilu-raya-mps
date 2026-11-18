@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { formatNomor } from '../../lib/format'
+import { isKotakKosong, optionLabel, optionNames } from '../../lib/candidates'
 import type { Candidate } from '../../lib/types'
 import { Spinner } from '../ui/Button'
 
@@ -38,9 +38,8 @@ export default function ConfirmVote({
           Konfirmasi pilihan
         </h2>
         <p className="mt-4 font-display text-3xl leading-snug font-bold sm:text-4xl">
-          Anda memilih{' '}
-          <span style={{ color: candidate.accent_color }}>Paslon {formatNomor(candidate.nomor_urut)}</span>:{' '}
-          {candidate.ketua_nama} &amp; {candidate.wakil_nama}.
+          Anda memilih <span style={{ color: candidate.accent_color }}>{optionLabel(candidate)}</span>
+          {isKotakKosong(candidate) ? '.' : `: ${optionNames(candidate)}.`}
         </p>
         <p className="mt-4 text-xl text-muted">Pilihan tidak dapat diubah.</p>
 

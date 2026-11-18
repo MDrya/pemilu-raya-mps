@@ -6,7 +6,7 @@ import SectionHeading from './SectionHeading'
 
 const NOTE = {
   belum_dibuka: 'Pemungutan suara belum dibuka. Angka partisipasi akan bergerak langsung begitu bilik dibuka.',
-  dibuka: 'Hasil per pasangan calon akan diumumkan setelah pemungutan suara ditutup.',
+  dibuka: 'Hasil penghitungan akan diumumkan setelah pemungutan suara ditutup.',
   ditutup: 'Pemungutan suara telah ditutup. Ini adalah angka partisipasi akhir.',
 }
 

@@ -28,7 +28,7 @@ export function usePublicData(): PublicData {
           ? null
           : supabase
               .from('candidates')
-              .select('id, nomor_urut, ketua_nama, wakil_nama, visi, misi, accent_color, photo_url')
+              .select('id, kind, nomor_urut, ketua_nama, wakil_nama, visi, misi, accent_color, photo_url')
               .order('nomor_urut'),
       ])
       if (request !== latestRequest.current) return // a newer refresh is in flight

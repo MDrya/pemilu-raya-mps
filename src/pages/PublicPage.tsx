@@ -8,6 +8,7 @@ import TurnoutSection from '../components/public/TurnoutSection'
 import { usePublicData } from '../components/public/usePublicData'
 import Button, { Spinner } from '../components/ui/Button'
 import { CANDIDATES, ELECTION } from '../config/election'
+import { candidatesHeading } from '../lib/candidates'
 import { isSupabaseConfigured } from '../lib/supabase'
 import type { PublicData } from '../lib/types'
 import MockControls from '../mocks/MockControls'
@@ -48,7 +49,7 @@ function PublicView({ data, extra }: { data: PublicData; extra?: ReactNode }) {
   const nav = [
     { href: '#linimasa', label: 'Linimasa' },
     showResults ? { href: '#hasil', label: 'Hasil' } : { href: '#partisipasi', label: 'Partisipasi' },
-    { href: '#paslon', label: 'Pasangan Calon' },
+    { href: '#paslon', label: candidatesHeading(candidates ?? CANDIDATES) },
   ]
 
   return (
@@ -116,7 +117,7 @@ function PublicView({ data, extra }: { data: PublicData; extra?: ReactNode }) {
 
       <footer className="mt-8 border-t border-line">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-8 text-sm text-muted sm:px-6">
-          <p>{ELECTION.name} · Demo portofolio, data pasangan calon dan pemilih fiktif.</p>
+          <p>{ELECTION.name} · Demo portofolio · data pemilih fiktif.</p>
           <Link to="/login" className="font-medium hover:text-ink">
             Masuk staf
           </Link>

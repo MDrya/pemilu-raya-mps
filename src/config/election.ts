@@ -9,7 +9,7 @@ export const ELECTION = {
   /** Short name for the hero heading. */
   title: 'Pemilu Raya MPS 2023',
   school: 'MAN Insan Cendekia Pasuruan',
-  tagline: 'Pemilihan Ketua dan Wakil Ketua MPS. Pemungutan suara elektronik di bilik resmi panitia — rahasia, cepat, dan tanpa kertas.',
+  tagline: 'Pemilihan Ketua MPS. Pemungutan suara elektronik di bilik resmi panitia — rahasia, cepat, dan tanpa kertas.',
   boothCount: 3,
 }
 
@@ -53,52 +53,35 @@ export const ACTIVE_STAGE_BY_STATUS: Record<ElectionStatus, number> = {
   ditutup: 6,
 }
 
-// Fictional candidate pairs. Ids are placeholders until the database exists.
+// Ballot options. A single candidate (calon tunggal) runs against "kotak kosong":
+// the candidate is elected only with more than 50% of the votes.
+// Ids are placeholders for mock data; the database assigns real ones.
 export const CANDIDATES: Candidate[] = [
   {
-    id: 'paslon-01',
+    id: 'calon-01',
+    kind: 'calon',
     nomor_urut: 1,
-    ketua_nama: 'Alfarizi Rahman Hakim',
-    wakil_nama: 'Nadia Putri Salsabila',
-    visi: 'Mewujudkan MPS yang aspiratif, transparan, dan dekat dengan seluruh siswa, sebagai jembatan yang jujur antara siswa, OSIS, dan madrasah.',
+    ketua_nama: 'Prins Muhammad Raynor Akbar',
+    wakil_nama: null,
+    visi: 'Menjadikan MPS sebagai wadah aspirasi yang terbuka, tegas, dan bergerak nyata untuk seluruh siswa MAN IC Pasuruan.',
     misi: [
-      'Membuka kotak aspirasi daring dan forum aspirasi bulanan di setiap angkatan.',
-      'Menerbitkan laporan kerja dan anggaran organisasi setiap akhir semester.',
-      'Mengawal program kerja OSIS agar tepat sasaran dan tepat waktu.',
-      'Menjalin komunikasi rutin dengan pembina asrama dan wali kelas.',
+      'Membuka forum aspirasi rutin di setiap angkatan dan asrama.',
+      'Mengawal program kerja OSIS secara transparan dengan laporan berkala.',
+      'Memperkuat komunikasi antara siswa, pembina asrama, dan madrasah.',
+      'Mendorong budaya disiplin, berakhlak, dan berprestasi di lingkungan madrasah.',
     ],
     accent_color: '#1f6f5c',
     photo_url: null,
   },
   {
-    id: 'paslon-02',
+    id: 'kotak-kosong',
+    kind: 'kotak_kosong',
     nomor_urut: 2,
-    ketua_nama: 'Muhammad Fathan Azzam',
-    wakil_nama: 'Kayla Aurelia Rahmadani',
-    visi: 'Menjadikan MPS sebagai penggerak budaya siswa yang berakhlak, disiplin, dan berprestasi di tingkat nasional.',
-    misi: [
-      'Menguatkan pembiasaan ibadah dan adab di lingkungan madrasah dan asrama.',
-      'Mendampingi siswa yang mengikuti olimpiade, lomba riset, dan kompetisi lainnya.',
-      'Menyusun tata tertib organisasi yang jelas dan ditegakkan secara adil.',
-      'Mengadakan evaluasi terbuka program OSIS setiap tengah semester.',
-      'Mempererat hubungan antarangkatan melalui kegiatan kakak asuh.',
-    ],
-    accent_color: '#b3452c',
-    photo_url: null,
-  },
-  {
-    id: 'paslon-03',
-    nomor_urut: 3,
-    ketua_nama: 'Raihan Dzaki Pratama',
-    wakil_nama: 'Syifa Nur Azizah',
-    visi: 'Membangun MPS yang kolaboratif dan inovatif, memanfaatkan teknologi untuk melayani siswa dengan lebih cepat dan terbuka.',
-    misi: [
-      'Mengembangkan portal informasi siswa untuk jadwal, pengumuman, dan aspirasi.',
-      'Mendorong kolaborasi ekstrakurikuler lintas bidang dalam satu festival tahunan.',
-      'Melatih kepemimpinan dan kemampuan berorganisasi pengurus kelas.',
-      'Menjaga lingkungan madrasah yang bersih, hijau, dan ramah bagi semua.',
-    ],
-    accent_color: '#34489a',
+    ketua_nama: 'Kotak Kosong',
+    wakil_nama: null,
+    visi: 'Pilih kotak kosong jika Anda tidak menyetujui calon tunggal. Calon tunggal hanya terpilih jika memperoleh lebih dari 50% suara; jika tidak, calon dinyatakan tidak terpilih.',
+    misi: [],
+    accent_color: '#4b5160',
     photo_url: null,
   },
 ]

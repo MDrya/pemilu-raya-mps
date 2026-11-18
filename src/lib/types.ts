@@ -12,11 +12,16 @@ export interface Election {
   closed_at: string | null
 }
 
+export type CandidateKind = 'calon' | 'kotak_kosong'
+
 export interface Candidate {
   id: string
+  /** 'calon' = a person or pair; 'kotak_kosong' = the empty-box option. */
+  kind: CandidateKind
   nomor_urut: number
   ketua_nama: string
-  wakil_nama: string
+  /** null when the candidate runs without a deputy. */
+  wakil_nama: string | null
   visi: string
   misi: string[]
   accent_color: string

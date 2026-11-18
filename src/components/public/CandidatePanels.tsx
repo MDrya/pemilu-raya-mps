@@ -1,10 +1,10 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
-import { formatNomor } from '../../lib/format'
+import { candidatesHeading, isKotakKosong, optionLabel, optionNames } from '../../lib/candidates'
 import type { Candidate } from '../../lib/types'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/useMediaQuery'
 import { ArrowRightIcon, ChevronDownIcon, CloseIcon } from '../icons'
-import { PairAvatars, PairNames, VisiMisi } from './CandidateDetails'
+import { OptionMark, PairAvatars, PairNames, VisiMisi } from './CandidateDetails'
 import SectionHeading from './SectionHeading'
 
 type PanelMode = 'equal' | 'expanded' | 'strip'
@@ -12,9 +12,9 @@ type PanelMode = 'equal' | 'expanded' | 'strip'
 const STRIP_WIDTH = 88
 const GAP = 12
 // The row is a size container, so 100cqw is its width. The expanded panel ends up
-// that wide minus the two strips; fixing the content at that width up front keeps it
-// from reflowing while the panel grows.
-const EXPANDED_CONTENT_WIDTH = `calc(100cqw - ${2 * (STRIP_WIDTH + GAP)}px)`
+// that wide minus the other panels' strips; fixing the content at that width up
+// front keeps it from reflowing while the panel grows.
+const expandedContentWidth = (panelCount: number) => `calc(100cqw - ${(panelCount - 1) * (STRIP_WIDTH + GAP)}px)`
 const ease = [0.16, 1, 0.3, 1] as const
 
 const fade = {
@@ -38,20 +38,22 @@ function PanelShape() {
 
 function DesktopPanel({
   candidate,
+  panelCount,
   mode,
   restoreFocus,
   onOpen,
   onClose,
 }: {
   candidate: Candidate
+  panelCount: number
   mode: PanelMode
   /** Focus this panel's open button when it reappears (after its own close). */
   restoreFocus: boolean
   onOpen: () => void
   onClose: () => void
 }) {
-  const nomor = formatNomor(candidate.nomor_urut)
-  const label = `Paslon ${nomor}: ${candidate.ketua_nama} & ${candidate.wakil_nama}`
+  const kotakKosong = isKotakKosong(candidate)
+  const label = kotakKosong ? 'Kotak Kosong' : `${optionLabel(candidate)}: ${optionNames(candidate)}`
 
   return (
     <motion.article
@@ -73,14 +75,16 @@ function DesktopPanel({
             className="absolute inset-0 flex flex-col justify-between p-8"
           >
             <div>
-              <p className="text-sm font-semibold tracking-widest text-white/70 uppercase">Paslon</p>
-              <p className="font-display text-8xl leading-none font-extrabold tabular-nums">{nomor}</p>
+              <p className="text-sm font-semibold tracking-widest text-white/70 uppercase">
+                {kotakKosong ? 'Pilihan' : candidate.wakil_nama ? 'Paslon' : 'Calon'}
+              </p>
+              <OptionMark candidate={candidate} className="text-8xl leading-none" />
             </div>
             <div className="grid gap-5">
               <PairAvatars candidate={candidate} />
               <PairNames candidate={candidate} />
               <p className="flex items-center gap-2 text-sm font-semibold">
-                Lihat visi & misi
+                {kotakKosong ? 'Apa itu kotak kosong?' : 'Lihat visi & misi'}
                 <ArrowRightIcon className="transition-transform group-hover:translate-x-1" />
               </p>
             </div>
@@ -94,9 +98,7 @@ function DesktopPanel({
             animate={{ opacity: 1, transition: { delay: 0.25, duration: 0.3 } }}
             className="absolute inset-x-0 top-8 flex justify-center"
           >
-            <p className="font-display text-4xl font-extrabold tabular-nums">
-              {nomor}
-            </p>
+            <OptionMark candidate={candidate} className="text-4xl" />
           </motion.div>
         )}
 
@@ -106,16 +108,16 @@ function DesktopPanel({
             {...fade}
             animate={{ opacity: 1, transition: { delay: 0.3, duration: 0.3 } }}
             className="absolute inset-y-0 left-0 flex flex-col gap-8 p-10"
-            style={{ width: EXPANDED_CONTENT_WIDTH }}
+            style={{ width: expandedContentWidth(panelCount) }}
           >
             <header className="flex items-start gap-8">
-              <p className="font-display text-9xl leading-[0.8] font-extrabold tabular-nums">{nomor}</p>
+              <OptionMark candidate={candidate} className="text-9xl leading-[0.8]" />
               <div className="grid gap-4 pt-1">
                 <PairAvatars candidate={candidate} />
                 <PairNames candidate={candidate} />
               </div>
             </header>
-            <div className="grid max-w-4xl grid-cols-[1fr_1.4fr] gap-10">
+            <div className={`grid max-w-4xl gap-10 ${candidate.misi.length > 0 ? 'grid-cols-[1fr_1.4fr]' : 'max-w-2xl'}`}>
               <VisiMisi candidate={candidate} delay={0.45} />
             </div>
           </motion.div>
@@ -127,7 +129,7 @@ function DesktopPanel({
           type="button"
           onClick={onClose}
           autoFocus
-          aria-label={`Tutup visi misi Paslon ${nomor}`}
+          aria-label={`Tutup ${kotakKosong ? 'penjelasan kotak kosong' : `visi misi ${optionLabel(candidate)}`}`}
           className="absolute top-5 right-5 z-10 flex size-12 items-center justify-center rounded-full bg-white/15 hover:bg-white/25 focus-visible:outline-white"
         >
           <CloseIcon />
@@ -137,7 +139,7 @@ function DesktopPanel({
           type="button"
           onClick={onOpen}
           autoFocus={restoreFocus}
-          aria-label={`Lihat visi misi ${label}`}
+          aria-label={kotakKosong ? 'Lihat penjelasan kotak kosong' : `Lihat visi misi ${label}`}
           className="absolute inset-0 z-10 rounded-3xl focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-white"
         />
       )}
@@ -154,6 +156,7 @@ function DesktopPanels({ candidates }: { candidates: Candidate[] }) {
         <DesktopPanel
           key={c.id}
           candidate={c}
+          panelCount={candidates.length}
           mode={expanded === null ? 'equal' : expanded === c.id ? 'expanded' : 'strip'}
           restoreFocus={lastClosed === c.id}
           onOpen={() => {
@@ -176,8 +179,7 @@ function MobileAccordion({ candidates }: { candidates: Candidate[] }) {
     <ul className="grid gap-3">
       {candidates.map((c) => {
         const open = expanded === c.id
-        const nomor = formatNomor(c.nomor_urut)
-        const panelId = `paslon-${nomor}-detail`
+        const panelId = `pilihan-${c.nomor_urut}-detail`
         return (
           <li
             key={c.id}
@@ -192,10 +194,11 @@ function MobileAccordion({ candidates }: { candidates: Candidate[] }) {
                 onClick={() => setExpanded(open ? null : c.id)}
                 className="flex min-h-24 w-full items-center gap-4 p-5 text-left focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-white"
               >
-                <span className="font-display text-5xl font-extrabold tabular-nums">{nomor}</span>
+                <OptionMark candidate={c} className="text-5xl" />
                 <span className="min-w-0 flex-1">
                   <span className="block font-display text-lg leading-tight font-bold">{c.ketua_nama}</span>
-                  <span className="block text-white/80">&amp; {c.wakil_nama}</span>
+                  {c.wakil_nama && <span className="block text-white/80">&amp; {c.wakil_nama}</span>}
+                  {isKotakKosong(c) && <span className="block text-white/80">Ketuk untuk penjelasan</span>}
                 </span>
                 <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3 }}>
                   <ChevronDownIcon width={24} height={24} />
@@ -233,7 +236,7 @@ export default function CandidatePanels({ candidates }: { candidates: Candidate[
       <SectionHeading
         id="paslon"
         eyebrow="Visi & misi"
-        title="Pasangan Calon"
+        title={candidatesHeading(candidates)}
         aside={
           <p className="text-sm text-muted">
             {isDesktop ? 'Klik panel untuk membuka visi & misi.' : 'Ketuk untuk membuka visi & misi.'}
@@ -241,7 +244,7 @@ export default function CandidatePanels({ candidates }: { candidates: Candidate[
         }
       />
       {candidates.length === 0 ? (
-        <p className="rounded-3xl bg-white p-8 text-center text-muted ring-1 ring-line">Belum ada pasangan calon.</p>
+        <p className="rounded-3xl bg-white p-8 text-center text-muted ring-1 ring-line">Belum ada calon.</p>
       ) : isDesktop ? (
         <DesktopPanels candidates={candidates} />
       ) : (

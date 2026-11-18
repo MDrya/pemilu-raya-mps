@@ -1,10 +1,13 @@
 # Pemilu Raya MPS — E-Voting Booth System
 
-A semi-offline polling-room system for a school election (Ketua & Wakil Ketua MPS, MAN Insan Cendekia Pasuruan),
+A semi-offline polling-room system for a school election (Ketua MPS, MAN Insan Cendekia Pasuruan),
 built as a portfolio demo. Voting happens on committee-provided devices in a closed room; anyone can watch live
 turnout online; per-candidate results stay sealed until voting closes.
 
-> All candidate and voter data in this repository is **fictional**.
+> The ballot is a single candidate, Prins Muhammad Raynor Akbar (shown with his permission), against
+> **kotak kosong** (the empty box). All voter data in this repository is **fictional**.
+>
+> The earlier three-pair version is tagged [`v1-tiga-paslon`](../../tree/v1-tiga-paslon).
 
 | Public page | Panitia control room | Booth kiosk |
 |---|---|---|
@@ -21,10 +24,12 @@ one person one vote — and removes the counting: totals are exact the moment vo
 ## How it works
 
 1. **Panitia** verifies a student at the desk (search by NIS or name) and **unlocks one booth** for them.
-2. The **booth** (a tablet/laptop in kiosk mode) switches to the ballot in real time. The student picks a pair,
+2. The **booth** (a tablet/laptop in kiosk mode) switches to the ballot in real time. The student picks the candidate or kotak kosong,
    confirms, and the booth **locks itself** again.
 3. The **public page** shows live turnout ("214 dari 400 pemilih…") — never per-candidate numbers.
 4. When panitia **closes voting**, results are published and revealed live on the public page.
+   With kotak kosong on the ballot, the candidate is elected only with **more than 50%** of the votes;
+   otherwise kotak kosong wins.
 
 | Route | Who | Purpose |
 |---|---|---|
@@ -79,7 +84,7 @@ sequenceDiagram
   Panitia->>DB: assign_voter_to_booth(voter, booth 1)
   Note over DB: voter → di_bilik, booth → terbuka
   DB-->>Booth: Realtime: booth 1 unlocked
-  Booth->>DB: cast_vote(booth 1, paslon 02)
+  Booth->>DB: cast_vote(booth 1, calon 01)
   Note over DB: one transaction:<br/>tally[02] += 1, voter → sudah,<br/>assignment deleted, booth → terkunci,<br/>turnout += 1
   DB-->>Booth: ok (no counts returned)
   DB-->>Public: Realtime: turnout 215/400

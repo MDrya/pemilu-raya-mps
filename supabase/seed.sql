@@ -21,36 +21,21 @@ delete from public.public_turnout;
 insert into public.election (id, name, status)
 values (1, 'Pemilu Raya MPS MAN IC Pasuruan 2023', 'belum_dibuka');
 
-insert into public.candidates (nomor_urut, ketua_nama, wakil_nama, visi, misi, accent_color)
+insert into public.candidates (kind, nomor_urut, ketua_nama, wakil_nama, visi, misi, accent_color)
 values
-  (1, 'Alfarizi Rahman Hakim', 'Nadia Putri Salsabila',
-   'Mewujudkan MPS yang aspiratif, transparan, dan dekat dengan seluruh siswa, sebagai jembatan yang jujur antara siswa, OSIS, dan madrasah.',
+  ('calon', 1, 'Prins Muhammad Raynor Akbar', null,
+   'Menjadikan MPS sebagai wadah aspirasi yang terbuka, tegas, dan bergerak nyata untuk seluruh siswa MAN IC Pasuruan.',
    array[
-     'Membuka kotak aspirasi daring dan forum aspirasi bulanan di setiap angkatan.',
-     'Menerbitkan laporan kerja dan anggaran organisasi setiap akhir semester.',
-     'Mengawal program kerja OSIS agar tepat sasaran dan tepat waktu.',
-     'Menjalin komunikasi rutin dengan pembina asrama dan wali kelas.'
+     'Membuka forum aspirasi rutin di setiap angkatan dan asrama.',
+     'Mengawal program kerja OSIS secara transparan dengan laporan berkala.',
+     'Memperkuat komunikasi antara siswa, pembina asrama, dan madrasah.',
+     'Mendorong budaya disiplin, berakhlak, dan berprestasi di lingkungan madrasah.'
    ],
    '#1f6f5c'),
-  (2, 'Muhammad Fathan Azzam', 'Kayla Aurelia Rahmadani',
-   'Menjadikan MPS sebagai penggerak budaya siswa yang berakhlak, disiplin, dan berprestasi di tingkat nasional.',
-   array[
-     'Menguatkan pembiasaan ibadah dan adab di lingkungan madrasah dan asrama.',
-     'Mendampingi siswa yang mengikuti olimpiade, lomba riset, dan kompetisi lainnya.',
-     'Menyusun tata tertib organisasi yang jelas dan ditegakkan secara adil.',
-     'Mengadakan evaluasi terbuka program OSIS setiap tengah semester.',
-     'Mempererat hubungan antarangkatan melalui kegiatan kakak asuh.'
-   ],
-   '#b3452c'),
-  (3, 'Raihan Dzaki Pratama', 'Syifa Nur Azizah',
-   'Membangun MPS yang kolaboratif dan inovatif, memanfaatkan teknologi untuk melayani siswa dengan lebih cepat dan terbuka.',
-   array[
-     'Mengembangkan portal informasi siswa untuk jadwal, pengumuman, dan aspirasi.',
-     'Mendorong kolaborasi ekstrakurikuler lintas bidang dalam satu festival tahunan.',
-     'Melatih kepemimpinan dan kemampuan berorganisasi pengurus kelas.',
-     'Menjaga lingkungan madrasah yang bersih, hijau, dan ramah bagi semua.'
-   ],
-   '#34489a');
+  ('kotak_kosong', 2, 'Kotak Kosong', null,
+   'Pilih kotak kosong jika Anda tidak menyetujui calon tunggal. Calon tunggal hanya terpilih jika memperoleh lebih dari 50% suara; jika tidak, calon dinyatakan tidak terpilih.',
+   '{}'::text[],
+   '#4b5160');
 
 insert into public.tally (candidate_id)
 select id from public.candidates;

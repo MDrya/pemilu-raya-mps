@@ -1,7 +1,10 @@
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
-import { formatInt, formatNomor, formatPercent } from '../../lib/format'
+import { hasKotakKosong, isKotakKosong, optionLabel } from '../../lib/candidates'
+import { formatInt, formatPercent } from '../../lib/format'
 import type { Candidate, PublicResult, PublicTurnout } from '../../lib/types'
+import { EmptyBoxIcon } from '../icons'
+import { OptionMark } from './CandidateDetails'
 import SectionHeading from './SectionHeading'
 
 const ease = [0.16, 1, 0.3, 1] as const
@@ -97,8 +100,38 @@ function Intro() {
   )
 }
 
-function Outcome({ winners, total }: { winners: Candidate[]; total: number }) {
-  if (total === 0) {
+type OutcomeResult =
+  | { kind: 'none' }
+  | { kind: 'winner'; winner: Candidate; pct: number }
+  | { kind: 'tie'; tied: Candidate[] }
+  | { kind: 'kotak_kosong'; calon: Candidate; pct: number }
+
+/**
+ * Who won. With kotak kosong on the ballot, the single candidate must get MORE
+ * than 50% of the votes; otherwise kotak kosong wins. Without it, most votes win.
+ */
+function decideOutcome(candidates: Candidate[], votes: number[]): OutcomeResult {
+  const total = votes.reduce((s, v) => s + v, 0)
+  if (total === 0) return { kind: 'none' }
+  const pctOf = (i: number) => (votes[i] / total) * 100
+
+  if (hasKotakKosong(candidates)) {
+    const i = candidates.findIndex((c) => !isKotakKosong(c))
+    if (i === -1) return { kind: 'none' }
+    return votes[i] * 2 > total
+      ? { kind: 'winner', winner: candidates[i], pct: pctOf(i) }
+      : { kind: 'kotak_kosong', calon: candidates[i], pct: pctOf(i) }
+  }
+
+  const max = Math.max(...votes)
+  const leaders = candidates.filter((_, i) => votes[i] === max)
+  if (leaders.length > 1) return { kind: 'tie', tied: leaders }
+  const i = votes.indexOf(max)
+  return { kind: 'winner', winner: candidates[i], pct: pctOf(i) }
+}
+
+function Outcome({ outcome, threshold }: { outcome: OutcomeResult; threshold: boolean }) {
+  if (outcome.kind === 'none') {
     return <p className="rounded-3xl bg-white p-8 text-lg text-muted ring-1 ring-line">Tidak ada suara yang tercatat.</p>
   }
 
@@ -108,36 +141,59 @@ function Outcome({ winners, total }: { winners: Candidate[]; total: number }) {
     transition: { duration: 0.6, ease },
   }
 
-  if (winners.length > 1) {
+  if (outcome.kind === 'tie') {
     return (
       <motion.div {...reveal} className="rounded-3xl bg-ink p-8 text-paper sm:p-10">
         <p className="text-sm font-semibold tracking-widest text-paper/70 uppercase">Hasil akhir</p>
         <p className="mt-2 font-display text-5xl font-extrabold tracking-tight sm:text-6xl">Hasil Imbang</p>
         <p className="mt-3 text-lg text-paper/80">
-          Paslon {winners.map((w) => formatNomor(w.nomor_urut)).join(' dan ')} memperoleh suara terbanyak yang sama.
+          {outcome.tied.map(optionLabel).join(' dan ')} memperoleh suara terbanyak yang sama.
         </p>
       </motion.div>
     )
   }
 
-  const [winner] = winners
+  if (outcome.kind === 'kotak_kosong') {
+    return (
+      <motion.div {...reveal} className="rounded-3xl bg-ink p-8 text-paper sm:p-10">
+        <p className="text-sm font-semibold tracking-widest text-paper/70 uppercase">Hasil akhir</p>
+        <p className="mt-2 flex items-center gap-4 font-display text-5xl font-extrabold tracking-tight sm:text-6xl">
+          <EmptyBoxIcon className="size-[0.85em] shrink-0" />
+          Kotak Kosong Menang
+        </p>
+        <p className="mt-3 max-w-2xl text-lg text-paper/80">
+          {outcome.calon.ketua_nama} memperoleh {formatPercent(outcome.pct)}% suara, tidak lebih dari 50%. Calon
+          tunggal dinyatakan tidak terpilih.
+        </p>
+      </motion.div>
+    )
+  }
+
+  const { winner, pct } = outcome
   return (
     <motion.div
       {...reveal}
       className="relative overflow-hidden rounded-3xl p-8 text-white sm:p-10"
       style={{ backgroundColor: winner.accent_color }}
     >
-      <p className="text-sm font-semibold tracking-widest text-white/75 uppercase">Pasangan calon terpilih</p>
+      <p className="text-sm font-semibold tracking-widest text-white/75 uppercase">
+        {winner.wakil_nama ? 'Pasangan calon terpilih' : 'Calon terpilih'}
+      </p>
       <div className="mt-3 flex flex-wrap items-end gap-x-6 gap-y-2">
-        <p className="font-display text-8xl leading-[0.85] font-extrabold tabular-nums">
-          {formatNomor(winner.nomor_urut)}
-        </p>
+        <OptionMark candidate={winner} className="text-8xl leading-[0.85]" />
         <p className="font-display text-2xl leading-tight font-bold sm:text-3xl">
           {winner.ketua_nama}
-          <br />
-          <span className="text-white/85">&amp; {winner.wakil_nama}</span>
+          {winner.wakil_nama && (
+            <>
+              <br />
+              <span className="text-white/85">&amp; {winner.wakil_nama}</span>
+            </>
+          )}
         </p>
       </div>
+      {threshold && (
+        <p className="mt-4 text-white/85">Memperoleh {formatPercent(pct)}% suara, melampaui batas 50%.</p>
+      )}
     </motion.div>
   )
 }
@@ -161,9 +217,17 @@ export default function ResultsSection({
   const { phase, counted, counts, total } = useTallyAnimation(finalVotes, dramatic)
 
   const done = phase === 'done'
+  const threshold = hasKotakKosong(candidates)
+  const outcome = decideOutcome(candidates, finalVotes)
+  // Row tagged when the count finishes: the elected candidate, or kotak kosong.
+  const winnerId =
+    outcome.kind === 'winner'
+      ? outcome.winner.id
+      : outcome.kind === 'kotak_kosong'
+        ? candidates.find(isKotakKosong)?.id
+        : undefined
   const max = Math.max(0, ...counts)
   const leaders = max > 0 ? counts.flatMap((v, i) => (v === max ? [i] : [])) : []
-  const winners = done ? leaders.map((i) => candidates[i]) : []
   const turnoutPct = turnout.total_dpt > 0 ? (turnout.voted_count / turnout.total_dpt) * 100 : 0
 
   return (
@@ -197,7 +261,7 @@ export default function ResultsSection({
           className="grid gap-6"
         >
           {done ? (
-            <Outcome winners={winners} total={total} />
+            <Outcome outcome={outcome} threshold={threshold} />
           ) : (
             <div className="rounded-3xl bg-white p-6 ring-1 ring-line sm:p-8" role="status" aria-live="off">
               <p className="flex items-baseline justify-between gap-4">
@@ -219,20 +283,20 @@ export default function ResultsSection({
               const pct = counted > 0 ? (votes / counted) * 100 : 0
               const barWidth = total > 0 ? (votes / total) * 100 : 0
               const leading = !done && leaders.length === 1 && leaders[0] === i
-              const isWinner = done && winners.length === 1 && winners[0].id === c.id
+              const isWinner = done && winnerId === c.id
               return (
                 <li key={c.id}>
                   <div className="mb-2 flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
                     <div className="flex items-center gap-3">
                       <span
-                        className="flex size-11 shrink-0 items-center justify-center rounded-xl font-display text-lg font-extrabold text-white tabular-nums"
+                        className="flex size-11 shrink-0 items-center justify-center rounded-xl text-lg text-white"
                         style={{ backgroundColor: c.accent_color }}
                       >
-                        {formatNomor(c.nomor_urut)}
+                        <OptionMark candidate={c} />
                       </span>
                       <span className="leading-tight">
                         <span className="block font-semibold">{c.ketua_nama}</span>
-                        <span className="block text-sm text-muted">&amp; {c.wakil_nama}</span>
+                        {c.wakil_nama && <span className="block text-sm text-muted">&amp; {c.wakil_nama}</span>}
                       </span>
                       {leading && (
                         <span className="rounded-full bg-paper px-2.5 py-0.5 text-xs font-semibold text-ink ring-1 ring-line">
@@ -245,7 +309,7 @@ export default function ResultsSection({
                           animate={{ opacity: 1, scale: 1 }}
                           className="rounded-full bg-ink px-2.5 py-0.5 text-xs font-semibold text-paper"
                         >
-                          Terpilih
+                          {isKotakKosong(c) ? 'Menang' : 'Terpilih'}
                         </motion.span>
                       )}
                     </div>
@@ -255,16 +319,24 @@ export default function ResultsSection({
                     </p>
                   </div>
                   <div
-                    className="h-5 overflow-hidden rounded-full bg-paper ring-1 ring-line"
+                    className="relative h-5 overflow-hidden rounded-full bg-paper ring-1 ring-line"
                     role="img"
-                    aria-label={`Paslon ${formatNomor(c.nomor_urut)}: ${formatInt(votes)} suara`}
+                    aria-label={`${optionLabel(c)}: ${formatInt(votes)} suara`}
                   >
                     <div className="h-full rounded-full" style={{ width: `${barWidth}%`, backgroundColor: c.accent_color }} />
+                    {threshold && (
+                      <span aria-hidden className="absolute inset-y-0 left-1/2 border-l-2 border-dashed border-ink/50" />
+                    )}
                   </div>
                 </li>
               )
             })}
           </ol>
+          {threshold && (
+            <p className="-mt-3 px-2 text-sm text-muted">
+              Garis putus-putus menandai 50% suara. Calon tunggal terpilih hanya jika melewatinya.
+            </p>
+          )}
 
           <dl className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-2xl bg-white p-6 ring-1 ring-line">

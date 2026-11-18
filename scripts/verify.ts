@@ -271,7 +271,7 @@ await check('#6 three booths voting at the same moment all count', async () => {
   await rpc(panitia, 'assign_voter_to_booth', { p_voter_id: v1, p_booth_id: 1 })
   await rpc(panitia, 'assign_voter_to_booth', { p_voter_id: v2, p_booth_id: 2 })
   await rpc(panitia, 'assign_voter_to_booth', { p_voter_id: v3, p_booth_id: 3 })
-  await Promise.all([1, 2, 3].map((b) => rpc(bilik, 'cast_vote', { p_booth_id: b, p_candidate_id: candidates[b - 1].id })))
+  await Promise.all([1, 2, 3].map((b) => rpc(bilik, 'cast_vote', { p_booth_id: b, p_candidate_id: candidates[(b - 1) % candidates.length].id })))
   return await expectIntegrity(4)
 })
 await check('#10 demo_simulate(150) keeps integrity green; results stay hidden', async () => {

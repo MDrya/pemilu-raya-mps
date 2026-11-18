@@ -35,3 +35,10 @@ export const CloseIcon = (props: SVGProps<SVGSVGElement>) => (
     <path d="M6 6l12 12M18 6L6 18" />
   </svg>
 )
+
+/** The "kotak kosong" mark: an empty box. Sized by its parent's font size by default. */
+export const EmptyBoxIcon = ({ className = 'size-[0.8em]', ...props }: SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden className={className} {...props}>
+    <rect x="3" y="3" width="18" height="18" rx="3" />
+  </svg>
+)

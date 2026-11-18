@@ -127,7 +127,7 @@ export default function DemoTools({
         onCancel={() => setConfirming(null)}
       >
         Semua suara dihapus, semua pemilih kembali “Belum Memilih”, semua bilik dikunci, dan status kembali ke
-        “Belum Dibuka”. Data pemilih dan pasangan calon tetap ada.
+        “Belum Dibuka”. Data pemilih dan calon tetap ada.
       </ConfirmDialog>
     </section>
   )

@@ -97,7 +97,7 @@ export default function ElectionControl({
         onConfirm={() => apply('ditutup')}
         onCancel={() => setConfirming(null)}
       >
-        Hasil per pasangan calon langsung diumumkan di halaman publik.{' '}
+        Hasil penghitungan langsung diumumkan di halaman publik.{' '}
         <strong className="text-ink">Pemungutan suara tidak dapat dibuka kembali.</strong>
       </ConfirmDialog>
     </section>
