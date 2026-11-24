@@ -9,8 +9,8 @@ export const ELECTION = {
   /** Short name for the hero heading. */
   title: 'PEMIRA IMDI 2027',
   /** Line above the hero heading. */
-  school: 'IMDI ITB · “The Greatest”',
-  tagline: 'Pemilihan Ketua Himpunan IMDI ITB. Pemungutan suara elektronik di bilik resmi panitia — rahasia, cepat, dan tanpa kertas.',
+  school: 'Ikatan Mahasiswa Desain Interior · ITB',
+  tagline: 'Pemilihan Ketua Himpunan IMDI ITB.',
   /** Shown above the timeline. */
   period: 'November – Desember 2026',
   boothCount: 3,
