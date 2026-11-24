@@ -8,9 +8,10 @@ import { fileURLToPath } from 'node:url'
 import { CANDIDATES, ELECTION } from '../src/config/election.ts'
 
 const VOTER_COUNT = 400
-// Three angkatan (entry years). NIS format: 99 + 2-digit year + 3-digit number.
-// The "99" prefix marks the numbers as demo data.
-const ANGKATAN = [21, 22, 23]
+// Three angkatan (entry years). Demo NIM format: 99 + 2-digit year + 4-digit number.
+// The "99" prefix marks the numbers as fictional demo data. The real DPT is
+// imported separately from private/ (see scripts/import-voters.ts).
+const ANGKATAN = [23, 24, 25]
 
 const MALE_FIRST = [
   'Ahmad', 'Muhammad', 'Rizky', 'Fajar', 'Dimas', 'Bagas', 'Arya', 'Hafidz', 'Naufal', 'Farhan',
@@ -62,13 +63,13 @@ const sql = (value: string | null) => (value === null ? 'null' : `'${value.repla
 const textArray = (items: string[]) =>
   items.length === 0 ? "'{}'::text[]" : `array[\n${items.map((m) => `     ${sql(m)}`).join(',\n')}\n   ]`
 
-const voters: { nis: string; nama: string }[] = []
+const voters: { nim: string; angkatan: number; nama: string }[] = []
 for (let i = 0; i < VOTER_COUNT; i++) {
   const year = ANGKATAN[i % ANGKATAN.length]
   const number = Math.floor(i / ANGKATAN.length) + 1
-  voters.push({ nis: `99${year}${String(number).padStart(3, '0')}`, nama: voterName() })
+  voters.push({ nim: `99${year}${String(number).padStart(4, '0')}`, angkatan: year, nama: voterName() })
 }
-voters.sort((a, b) => a.nis.localeCompare(b.nis))
+voters.sort((a, b) => a.nim.localeCompare(b.nim))
 
 const candidateRows = CANDIDATES.map(
   (c) =>
@@ -83,7 +84,7 @@ const boothRows = Array.from(
   (_, i) => `  (${i + 1}, ${sql(`Bilik ${i + 1}`)})`,
 )
 
-const voterRows = voters.map((v) => `  (${sql(v.nis)}, ${sql(v.nama)})`)
+const voterRows = voters.map((v) => `  (${sql(v.nim)}, ${v.angkatan}, ${sql(v.nama)})`)
 
 const output = `-- =============================================================================
 -- PEMILU — seed data
@@ -119,8 +120,8 @@ insert into public.booths (id, label)
 values
 ${boothRows.join(',\n')};
 
--- ${VOTER_COUNT} fictional voters (siswa).
-insert into public.voters (nis, nama)
+-- ${VOTER_COUNT} fictional demo voters. For the real DPT run private/voters.sql afterwards.
+insert into public.voters (nim, angkatan, nama)
 values
 ${voterRows.join(',\n')};
 

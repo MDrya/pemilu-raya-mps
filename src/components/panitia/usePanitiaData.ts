@@ -35,10 +35,10 @@ export function usePanitiaData() {
     const supabase = getSupabase()
     try {
       const [e, b, t, i] = await Promise.all([
-        supabase.from('election').select('name, status, opened_at, closed_at').single(),
+        supabase.from('election').select('name, status, opened_at, closed_at, demo_tools').single(),
         supabase
           .from('booths')
-          .select('id, label, status, unlocked_at, booth_assignments(voters(nis, nama))')
+          .select('id, label, status, unlocked_at, booth_assignments(voters(nim, nama))')
           .order('id'),
         supabase.from('public_turnout').select('total_dpt, voted_count, status').single(),
         supabase.rpc('get_integrity').single(),

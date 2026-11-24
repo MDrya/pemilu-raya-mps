@@ -19,9 +19,9 @@ async function searchVoters(term: string): Promise<Voter[]> {
   // Strip characters that have meaning in PostgREST filters / LIKE patterns.
   const clean = term.replace(/[%_,()*\\]/g, '').trim()
   if (!clean) return []
-  const query = getSupabase().from('voters').select('id, nis, nama, status').order('nis').limit(RESULT_LIMIT)
+  const query = getSupabase().from('voters').select('id, nim, angkatan, nama, status').order('nim').limit(RESULT_LIMIT)
   const { data, error } = await (/^\d+$/.test(clean)
-    ? query.ilike('nis', `${clean}%`)
+    ? query.ilike('nim', `${clean}%`)
     : query.ilike('nama', `%${clean}%`))
   if (error) throw error
   return data as Voter[]
@@ -100,11 +100,11 @@ export default function VoterDesk({
       <h2 id="verifikasi" className="font-display text-2xl font-bold">
         Verifikasi Pemilih
       </h2>
-      <p className="mt-1 text-sm text-muted">Cari berdasarkan NIS atau nama, pilih pemilih, lalu buka bilik.</p>
+      <p className="mt-1 text-sm text-muted">Cari berdasarkan NIM atau nama, pilih pemilih, lalu buka bilik.</p>
 
       <div className="relative mt-4">
         <label htmlFor="cari-pemilih" className="sr-only">
-          Cari NIS atau nama
+          Cari NIM atau nama
         </label>
         <input
           id="cari-pemilih"
@@ -112,7 +112,7 @@ export default function VoterDesk({
           type="search"
           autoFocus
           autoComplete="off"
-          placeholder="Contoh: 9921001 atau Aisyah"
+          placeholder="Ketik NIM (mis. 17324…) atau nama"
           value={term}
           onChange={(e) => {
             setTerm(e.target.value)
@@ -152,7 +152,8 @@ export default function VoterDesk({
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-semibold">{voter.nama}</span>
                   <span className={`block text-sm tabular-nums ${isSelected ? 'text-paper/70' : 'text-muted'}`}>
-                    NIS {voter.nis}
+                    NIM {voter.nim}
+                    {voter.angkatan !== null && ` · Angkatan ${voter.angkatan}`}
                   </span>
                 </span>
                 <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${CHIP[voter.status]}`}>

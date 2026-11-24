@@ -59,7 +59,7 @@ export function PairNames({ candidate }: { candidate: Candidate }) {
   return (
     <dl className="grid gap-3">
       <div>
-        <dt className={term}>{candidate.wakil_nama ? 'Calon Ketua' : 'Calon Ketua MPS'}</dt>
+        <dt className={term}>{candidate.wakil_nama ? 'Calon Ketua' : 'Calon Ketua Himpunan'}</dt>
         <dd className={name}>{candidate.ketua_nama}</dd>
       </div>
       {candidate.wakil_nama && (

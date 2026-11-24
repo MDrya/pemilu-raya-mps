@@ -5,11 +5,14 @@ import type { BoothStatus, Candidate, ElectionStatus, VoterStatus } from '../lib
 
 export const ELECTION = {
   /** Full name, used in the document title and the database. */
-  name: 'Pemilu Raya MPS MAN IC Pasuruan 2023',
+  name: 'PEMIRA IMDI ITB 2027',
   /** Short name for the hero heading. */
-  title: 'Pemilu Raya MPS 2023',
-  school: 'MAN Insan Cendekia Pasuruan',
-  tagline: 'Pemilihan Ketua MPS. Pemungutan suara elektronik di bilik resmi panitia — rahasia, cepat, dan tanpa kertas.',
+  title: 'PEMIRA IMDI 2027',
+  /** Line above the hero heading. */
+  school: 'IMDI ITB · “The Greatest”',
+  tagline: 'Pemilihan Ketua Himpunan IMDI ITB. Pemungutan suara elektronik di bilik resmi panitia — rahasia, cepat, dan tanpa kertas.',
+  /** Shown above the timeline. */
+  period: 'November – Desember 2026',
   boothCount: 3,
 }
 
@@ -32,25 +35,36 @@ export const BOOTH_STATUS_LABEL: Record<BoothStatus, string> = {
 
 export interface TimelineStage {
   title: string
+  /** Display text. */
   date: string
+  /** First day of the stage (YYYY-MM-DD), used to highlight it before voting opens. */
+  start: string
 }
 
 export const TIMELINE: TimelineStage[] = [
-  { title: 'Pendaftaran Calon', date: '1–5 Agustus 2023' },
-  { title: 'Verifikasi Berkas', date: '7–9 Agustus 2023' },
-  { title: 'Masa Kampanye', date: '10–19 Agustus 2023' },
-  { title: 'Debat Kandidat', date: '18 Agustus 2023' },
-  { title: 'Masa Tenang', date: '20–22 Agustus 2023' },
-  { title: 'Pemungutan Suara', date: '23 Agustus 2023' },
-  { title: 'Penghitungan & Pengumuman', date: '23–24 Agustus 2023' },
+  { title: 'Sosialisasi', date: '14 November 2026', start: '2026-11-14' },
+  { title: 'Open Berkas', date: '20–24 November 2026', start: '2026-11-20' },
+  { title: 'FPT Cakahim', date: '27 November 2026', start: '2026-11-27' },
+  { title: 'Hearing & Pemungutan Suara', date: '4 Desember 2026', start: '2026-12-04' },
+  { title: 'Pengumuman Hasil', date: '4 Desember 2026', start: '2026-12-04' },
 ]
 
-// Timeline index highlighted for each election status (dates are in the past,
-// so the active stage follows the status, not the calendar).
-export const ACTIVE_STAGE_BY_STATUS: Record<ElectionStatus, number> = {
-  belum_dibuka: 4,
-  dibuka: 5,
-  ditutup: 6,
+/** Index of the voting stage in TIMELINE. */
+export const VOTING_STAGE = 3
+
+/**
+ * Which timeline stage to highlight. While voting is open or closed the election
+ * status decides; before that, the latest stage whose start date has passed.
+ */
+export function activeStage(status: ElectionStatus, today = new Date()): number {
+  if (status === 'dibuka') return VOTING_STAGE
+  if (status === 'ditutup') return TIMELINE.length - 1
+  const todayKey = today.toLocaleDateString('sv-SE') // YYYY-MM-DD in local time
+  let active = 0
+  TIMELINE.forEach((stage, i) => {
+    if (i < VOTING_STAGE && stage.start <= todayKey) active = i
+  })
+  return active
 }
 
 // Ballot options. A single candidate (calon tunggal) runs against "kotak kosong":
@@ -63,12 +77,14 @@ export const CANDIDATES: Candidate[] = [
     nomor_urut: 1,
     ketua_nama: 'Prins Muhammad Raynor Akbar',
     wakil_nama: null,
-    visi: 'Menjadikan MPS sebagai wadah aspirasi yang terbuka, tegas, dan bergerak nyata untuk seluruh siswa MAN IC Pasuruan.',
+    // PLACEHOLDER visi & misi — replace with the candidate's own text when it's ready,
+    // then run `npm run seed:generate`.
+    visi: 'Menjadikan IMDI ITB sebagai himpunan yang terbuka, solid, dan bergerak nyata untuk seluruh anggotanya.',
     misi: [
-      'Membuka forum aspirasi rutin di setiap angkatan dan asrama.',
-      'Mengawal program kerja OSIS secara transparan dengan laporan berkala.',
-      'Memperkuat komunikasi antara siswa, pembina asrama, dan madrasah.',
-      'Mendorong budaya disiplin, berakhlak, dan berprestasi di lingkungan madrasah.',
+      'Membuka forum aspirasi rutin di setiap angkatan.',
+      'Menjalankan program kerja himpunan secara transparan dengan laporan berkala.',
+      'Memperkuat komunikasi antara anggota, Badan Pengurus, dan program studi.',
+      'Mendorong budaya berkarya, berkolaborasi, dan berprestasi di Desain Interior ITB.',
     ],
     accent_color: '#1f6f5c',
     photo_url: null,

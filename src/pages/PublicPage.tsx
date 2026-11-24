@@ -61,7 +61,7 @@ function PublicView({ data, extra }: { data: PublicData; extra?: ReactNode }) {
               <span key={c.id} className="h-5 w-1.5 rounded-full" style={{ backgroundColor: c.accent_color }} />
             ))}
           </span>
-          Pemilu Raya MPS
+          {ELECTION.title}
         </a>
         <nav aria-label="Bagian halaman" className="hidden sm:block">
           <ul className="flex gap-6 text-sm font-medium text-muted">
@@ -117,7 +117,7 @@ function PublicView({ data, extra }: { data: PublicData; extra?: ReactNode }) {
 
       <footer className="mt-8 border-t border-line">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-8 text-sm text-muted sm:px-6">
-          <p>{ELECTION.name} · Demo portofolio · data pemilih fiktif.</p>
+          <p>{ELECTION.name} · Pemungutan suara elektronik.</p>
           <Link to="/login" className="font-medium hover:text-ink">
             Masuk staf
           </Link>

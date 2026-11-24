@@ -10,6 +10,8 @@ export interface Election {
   status: ElectionStatus
   opened_at: string | null
   closed_at: string | null
+  /** false on the real voting day: Reset/Simulasi are hidden and refused. */
+  demo_tools: boolean
 }
 
 export type CandidateKind = 'calon' | 'kotak_kosong'
@@ -36,7 +38,9 @@ export interface PublicTurnout {
 
 export interface Voter {
   id: string
-  nis: string
+  /** Nomor Induk Mahasiswa */
+  nim: string
+  angkatan: number | null
   nama: string
   status: VoterStatus
 }
@@ -47,7 +51,7 @@ export interface Booth {
   status: BoothStatus
   unlocked_at: string | null
   /** The voter currently inside (panitia only; always null for bilik). */
-  voter: Pick<Voter, 'nis' | 'nama'> | null
+  voter: Pick<Voter, 'nim' | 'nama'> | null
 }
 
 export interface Integrity {

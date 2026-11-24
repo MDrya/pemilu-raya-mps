@@ -31,3 +31,6 @@ dist-ssr
 # Supabase CLI local state
 supabase/.temp
 supabase/.branches
+
+# Real voter data and generated import SQL. NEVER commit (public repo).
+private/

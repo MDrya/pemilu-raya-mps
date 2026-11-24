@@ -77,7 +77,7 @@ export default function BoothMonitor({ booths, onChanged }: { booths: Booth[]; o
                   <div className="min-w-0 text-sm">
                     <p className="truncate font-semibold">{booth.voter?.nama ?? '—'}</p>
                     <p className="text-muted">
-                      NIS {booth.voter?.nis ?? '—'} · menunggu{' '}
+                      NIM {booth.voter?.nim ?? '—'} · menunggu{' '}
                       {booth.unlocked_at && <Elapsed since={booth.unlocked_at} />}
                     </p>
                   </div>

@@ -212,7 +212,7 @@ await check('public + booth devices subscribe to Realtime', async () => {
 
 const { data: candidateRows } = await anon.from('candidates').select('*').order('nomor_urut')
 const candidates = (candidateRows ?? []) as { id: string; nomor_urut: number }[]
-const { data: voterRows } = await panitia.from('voters').select('id').eq('status', 'belum').order('nis').limit(5)
+const { data: voterRows } = await panitia.from('voters').select('id').eq('status', 'belum').order('nim').limit(5)
 const [v0, v1, v2, v3] = ((voterRows ?? []) as { id: string }[]).map((v) => v.id)
 
 console.log('\nVoting open')

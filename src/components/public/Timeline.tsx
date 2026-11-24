@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { ACTIVE_STAGE_BY_STATUS, TIMELINE } from '../../config/election'
+import { activeStage, ELECTION, TIMELINE } from '../../config/election'
 import type { ElectionStatus } from '../../lib/types'
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/useMediaQuery'
 import { CheckIcon } from '../icons'
@@ -60,14 +60,14 @@ function StageText({ title, date, state }: { title: string; date: string; state:
 
 export default function Timeline({ status }: { status: ElectionStatus }) {
   const isDesktop = useMediaQuery(DESKTOP_QUERY)
-  const active = ACTIVE_STAGE_BY_STATUS[status]
+  const active = activeStage(status)
   const stateOf = (i: number): StageState =>
     i < active ? 'done' : i === active ? 'active' : 'upcoming'
   const last = TIMELINE.length - 1
 
   return (
     <section aria-labelledby="linimasa" className="scroll-mt-8 py-16 sm:py-20">
-      <SectionHeading id="linimasa" eyebrow="Agustus 2023" title="Linimasa Pemilu" />
+      <SectionHeading id="linimasa" eyebrow={ELECTION.period} title="Linimasa Pemilu" />
 
       {isDesktop ? (
         <ol className="relative grid" style={{ gridTemplateColumns: `repeat(${TIMELINE.length}, 1fr)` }}>

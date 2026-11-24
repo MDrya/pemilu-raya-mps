@@ -1,13 +1,15 @@
-# Pemilu Raya MPS — E-Voting Booth System
+# PEMIRA IMDI ITB 2027 — E-Voting Booth System
 
-A semi-offline polling-room system for a school election (Ketua MPS, MAN Insan Cendekia Pasuruan),
-built as a portfolio demo. Voting happens on committee-provided devices in a closed room; anyone can watch live
-turnout online; per-candidate results stay sealed until voting closes.
+A semi-offline polling-room system for a student election: the Ketua Himpunan of IMDI ITB, voted on
+4 December 2026. Voting happens on committee-provided devices in a closed room; anyone can watch live turnout
+online; per-candidate results stay sealed until voting closes.
 
 > The ballot is a single candidate, Prins Muhammad Raynor Akbar (shown with his permission), against
-> **kotak kosong** (the empty box). All voter data in this repository is **fictional**.
+> **kotak kosong** (the empty box). **No real voter data is in this repository**: the seed ships fictional
+> demo voters, and the real voter list (DPT) is imported from a git-ignored `private/` folder.
 >
-> The earlier three-pair version is tagged [`v1-tiga-paslon`](../../tree/v1-tiga-paslon).
+> It started as a portfolio demo for a school election; that three-pair version is tagged
+> [`v1-tiga-paslon`](../../tree/v1-tiga-paslon).
 
 | Public page | Panitia control room | Booth kiosk |
 |---|---|---|
@@ -164,6 +166,24 @@ npm run seed:generate
 In development, `http://localhost:5173/?mock` shows the public page with local mock data and a panel to switch
 states (including results and a tie) without touching the database.
 
+### Real voter list (DPT) — kept private
+
+1. Put the list in `private/voters.csv` with the header `nim,angkatan,nama`. `private/` is git-ignored;
+   never commit real names or NIMs.
+2. Run `npm run voters:import`. It checks every row (8-digit NIM matching the angkatan, no NIM used twice),
+   tidies name capitalisation, and writes `private/voters.sql`.
+3. Run `private/voters.sql` in the Supabase SQL Editor. It replaces all voters and refuses to run once any vote
+   has been recorded.
+
+### Before the real vote
+
+- Rehearse with the real room and devices, then press **Reset Demo**.
+- Run `supabase/demo_tools_off.sql`: Reset and Simulasi disappear from the dashboard and the database refuses
+  them, so a wrong click can't add fake votes or wipe real ones. (`demo_tools_on.sql` switches them back after
+  the event.)
+- Keep the 3 check-in laptops on `/panitia` and the 3 booth laptops on `/bilik/1`, `/bilik/2`, `/bilik/3`
+  (fullscreen via the booth's hidden staff menu: hold the booth name for 2 seconds).
+
 ### Verify against your Supabase project
 
 ```bash
@@ -173,7 +193,8 @@ npm run verify
 Signs in as anon, panitia, and bilik (asks for the two staff passwords) and runs a full election against the
 real database: access rules, locked-booth and double-assignment rejections, a simultaneous double tap, three
 booths voting at once, cancel, `demo_simulate`, closing, Realtime payloads (no per-candidate data before close),
-and `demo_reset`. It resets the election at the start and the end.
+and `demo_reset`. It resets the election at the start and the end, so run it only for rehearsals, with demo
+tools on.
 
 ### Deploy (Vercel)
 

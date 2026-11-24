@@ -2,7 +2,8 @@ import { motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { CheckIcon } from '../icons'
 
-export const THANKS_SECONDS = 5
+// Short, so the booth is ready for the next voter quickly (35-minute voting window).
+export const THANKS_SECONDS = 3
 
 export function ThanksScreen({ onDone }: { onDone: () => void }) {
   const [left, setLeft] = useState(THANKS_SECONDS)

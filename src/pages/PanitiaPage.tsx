@@ -75,13 +75,16 @@ function Dashboard() {
           <div className="grid gap-6">
             <BoothMonitor booths={booths} onChanged={refresh} />
             <StatsPanel turnout={turnout} integrity={integrity} />
-            <DemoTools
-              electionStatus={election.status}
-              remainingVoters={
-                turnout.total_dpt - turnout.voted_count - booths.filter((b) => b.status === 'terbuka').length
-              }
-              onChanged={refresh}
-            />
+            {/* Hidden on the real voting day (election.demo_tools = false). */}
+            {election.demo_tools && (
+              <DemoTools
+                electionStatus={election.status}
+                remainingVoters={
+                  turnout.total_dpt - turnout.voted_count - booths.filter((b) => b.status === 'terbuka').length
+                }
+                onChanged={refresh}
+              />
+            )}
           </div>
         </div>
       </main>
